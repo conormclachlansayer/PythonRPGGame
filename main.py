@@ -3,6 +3,7 @@ from classes.magic import Spell
 from classes.inventory import item
 import random
 
+# Testing it's pulled correctly
 # Create Black Magic
 fire = Spell("Fire", 25, 600, "black")
 thunder = Spell("Thunder", 25, 600, "black")
