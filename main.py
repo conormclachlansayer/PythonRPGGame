@@ -13,13 +13,13 @@ blizzard = Spell("Blizzard", 25, 600, "black")
 meteor = Spell("Meteor", 40, 1200, "black")
 quake = Spell("Quake", 14, 140, "black")
 
-# Create White Magic
+# Create White Magic - format (self, name, cost, dmg, type)
 cure = Spell("Cure", 25, 620, "white")
 cura = Spell("Cura", 35, 1500, "white")
 curaga = Spell("Curaga", 50, 6000, "white")
 
-# Create some Items
-potion = item("Potion", "potion", "Heals 100 HP", 100)
+# Create some Items - format (self, name, type, description, prop)
+potion = item("Potion", "potion", "Heals 100 HP", 100) 
 hipotion = item("Hi-Potion", "potion", "Heals 200 HP", 200)
 superpotion = item("Super Potion", "potion", "Heals 1500 HP", 1500)
 elixer = item("Elixer", "elixer", "Fully restores HP/MP of one party member", 9999)
@@ -70,99 +70,117 @@ while running:
 
         player.choose_action()
         choice = input("    Choose action: ")
-        index = int(choice) - 1
+        try: 
+            index = int(choice) - 1
+        except: 
+            print("Please enter a valid input.")
+
         if index == 0:
             dmg = player.generate_damage()
             enemy = player.choose_target(enemies)
-            if enemies[enemy].get_hp() > 0:
-                enemies[enemy].take_damage(dmg)
-                print(bcolors.BOLD + player.name[0:5] + " attacks " + enemies[enemy].name[0:5] + " for", dmg,
-                      "points of damage." + bcolors.ENDC)
-            if enemies[enemy].get_hp() == 0:
-                print("\n" + bcolors.FAIL + bcolors.BOLD + enemies[enemy].name + " has died." + bcolors.ENDC)
-                del enemies[enemy]
-                defeated_enemies += 1
-                if defeated_enemies == 3:
-                    print("\n" + bcolors.OKGREEN + "Congratulations, you've defeated the enemy!" + bcolors.BOLD +
-                          " You win!" + bcolors.ENDC)
-                    running = False
-
-        elif index == 1:
-            player.choose_magic()
-            magic_choice = int(input("    Choose magic: ")) - 1
-
-            spell = player.magic[magic_choice]
-            magic_dmg = spell.generate_damage()
-
-            current_mp = player.get_mp()
-
-            if magic_choice == -1:
-                continue
-
-            if spell.cost > current_mp:
-                print(bcolors.FAIL + "\nNot enough MP left\n" + bcolors.ENDC)
-                continue
-
-            player.reduce_mp(spell.cost)
-
-            if spell.type == "white":
-                player.heal(magic_dmg)
-                print(bcolors.OKBLUE + "\n" + spell.name + " heals for " + str(magic_dmg) + " HP." + bcolors.ENDC)
-            elif spell.type == "black":
-                enemy = player.choose_target(enemies)
-                enemies[enemy].take_damage(magic_dmg)
-                print(bcolors.OKBLUE + "\n" + spell.name + " deals", str(magic_dmg), "points of damage to " +
-                      enemies[enemy].name[0:5] + "." + bcolors.ENDC)
+            try:
+                if enemies[enemy].get_hp() > 0:
+                    enemies[enemy].take_damage(dmg)
+                    print(bcolors.BOLD + player.name[0:5] + " attacks " + enemies[enemy].name[0:5] + " for", dmg,
+                          "points of damage." + bcolors.ENDC)
                 if enemies[enemy].get_hp() == 0:
                     print("\n" + bcolors.FAIL + bcolors.BOLD + enemies[enemy].name + " has died." + bcolors.ENDC)
                     del enemies[enemy]
                     defeated_enemies += 1
                     if defeated_enemies == 3:
                         print("\n" + bcolors.OKGREEN + "Congratulations, you've defeated the enemy!" + bcolors.BOLD +
-                              " You win!" + bcolors.ENDC)
+                            " You win!" + bcolors.ENDC)
                         running = False
+                        break
+            except IndexError:
+                print("\nThat is not a valid target. Unfortunately your attack does not hit any target. Please be more careful with your choice next time.")
+
+        elif index == 1:
+            try:
+                player.choose_magic()
+                magic_choice = int(input("    Choose magic: ")) - 1
+
+                spell = player.magic[magic_choice]
+                magic_dmg = spell.generate_damage()
+
+                current_mp = player.get_mp()
+
+                if magic_choice == -1:
+                    continue
+
+                if spell.cost > current_mp:
+                    print(bcolors.FAIL + "\nNot enough MP left\n" + bcolors.ENDC)
+                    continue
+
+                player.reduce_mp(spell.cost)
+
+                if spell.type == "white":
+                    player.heal(magic_dmg)
+                    print(bcolors.OKBLUE + "\n" + spell.name + " heals for " + str(magic_dmg) + " HP." + bcolors.ENDC)
+                elif spell.type == "black":
+                    enemy = player.choose_target(enemies)
+                    enemies[enemy].take_damage(magic_dmg)
+                    print(bcolors.OKBLUE + "\n" + spell.name + " deals", str(magic_dmg), "points of damage to " +
+                        enemies[enemy].name[0:5] + "." + bcolors.ENDC)
+                    if enemies[enemy].get_hp() == 0:
+                        print("\n" + bcolors.FAIL + bcolors.BOLD + enemies[enemy].name + " has died." + bcolors.ENDC)
+                        del enemies[enemy]
+                        defeated_enemies += 1
+                        if defeated_enemies == 3:
+                            print("\n" + bcolors.OKGREEN + "Congratulations, you've defeated the enemy!" + bcolors.BOLD +
+                                " You win!" + bcolors.ENDC)
+                            running = False
+                            break
+            except IndexError:
+                print("\nThat is not a valid choice. Unfortunately your player gets confused and misses their turn. Please be more careful with your choice next time.")
 
 
         elif index == 2:
-            player.choose_item()
-            item_choice = int(input("    Choose item: ")) - 1
-            if item_choice == -1:
-                continue
+            try:
+                player.choose_item()
+                item_choice = int(input("    Choose item: ")) - 1
+                if item_choice == -1:
+                    continue
 
-            item = player.items[item_choice]["item"]
+                item = player.items[item_choice]["item"]
 
-            if player.items[item_choice]["quantity"] == 0:
-                print(bcolors.FAIL + "\n" + "None left in your inventory..." + bcolors.ENDC)
-                continue
+                if player.items[item_choice]["quantity"] == 0:
+                    print(bcolors.FAIL + "\n" + "None left in your inventory..." + bcolors.ENDC)
+                    continue
 
-            player.items[item_choice]["quantity"] -= 1
+                player.items[item_choice]["quantity"] -= 1
 
-            if item.type == "potion":
-                player.heal(item.prop)
-                print(bcolors.OKGREEN + "\n" + item.name + " heals for " + str(item.prop) + " points." + bcolors.ENDC)
-            elif item.type == "elixer":
-                if item.name == "MegaElixer":
-                    for i in players:
-                        i.hp = i.maxhp
-                        i.mp = i.maxmp
-                    print(bcolors.OKGREEN + "\n" + item.name + " fully restores all HP/MP." + bcolors.ENDC)
-                if item.name == "Elixer":
-                    player.hp = player.maxhp
-                    player.mp = player.maxmp
-                    print(bcolors.OKGREEN + "\n" + item.name + " fully restores HP/MP." + bcolors.ENDC)
-            elif item.type == "attack":
-                enemy = player.choose_target(enemies)
-                enemies[enemy].take_damage(item.prop)
-                print(bcolors.FAIL + "\n" + item.name + " deals " + str(item.prop) + " points of damage to " +
-                      enemies[enemy].name[0:5] + "." + bcolors.ENDC)
-                if enemies[enemy].get_hp() == 0:
-                    print("\n" + bcolors.FAIL + bcolors.BOLD + enemies[enemy].name + " has died." + bcolors.ENDC)
-                    del enemies[enemy]
-                    defeated_enemies += 1
-                    if defeated_enemies == 3:
-                        print("\n" + bcolors.OKGREEN + "Congratulations, you've defeated the enemy!" + bcolors.BOLD +
-                              " You win!" + bcolors.ENDC)
-                        running = False
+                if item.type == "potion":
+                    player.heal(item.prop)
+                    print(bcolors.OKGREEN + "\n" + item.name + " heals for " + str(item.prop) + " points." + bcolors.ENDC)
+                elif item.type == "elixer":
+                    if item.name == "MegaElixer":
+                        for i in players:
+                            i.hp = i.maxhp
+                            i.mp = i.maxmp
+                        print(bcolors.OKGREEN + "\n" + item.name + " fully restores all HP/MP." + bcolors.ENDC)
+                    if item.name == "Elixer":
+                        player.hp = player.maxhp
+                        player.mp = player.maxmp
+                        print(bcolors.OKGREEN + "\n" + item.name + " fully restores HP/MP." + bcolors.ENDC)
+                elif item.type == "attack":
+                    enemy = player.choose_target(enemies)
+                    enemies[enemy].take_damage(item.prop)
+                    print(bcolors.FAIL + "\n" + item.name + " deals " + str(item.prop) + " points of damage to " +
+                        enemies[enemy].name[0:5] + "." + bcolors.ENDC)
+                    if enemies[enemy].get_hp() == 0:
+                        print("\n" + bcolors.FAIL + bcolors.BOLD + enemies[enemy].name + " has died." + bcolors.ENDC)
+                        del enemies[enemy]
+                        defeated_enemies += 1
+                        if defeated_enemies == 3:
+                            print("\n" + bcolors.OKGREEN + "Congratulations, you've defeated the enemy!" + bcolors.BOLD +
+                                " You win!" + bcolors.ENDC)
+                            running = False
+                            break
+            except IndexError:
+                print("\nThat is not a valid choice. Unfortunately your player gets confused and misses their turn. Please be more careful with your choice next time.")
+        else:
+            print(f'\nOh no, unfortunately {index+1} is not a valid input. This player misses a turn. Please be more careful next time.')
 
     print("\n" + "=====================")
 
